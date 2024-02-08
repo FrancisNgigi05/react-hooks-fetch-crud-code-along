@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ItemForm from "./ItemForm";
 import Filter from "./Filter";
 import Item from "./Item";
@@ -11,6 +11,39 @@ function ShoppingList() {
     setSelectedCategory(category);
   }
 
+  // Getting the data from the server then displaying it
+  useEffect(() => {
+    fetch("http://localhost:4000/items")
+      .then((r) => r.json())
+      .then((items) => setItems(items))
+  }, []);
+
+  function handleUPdatedItem(updatedItem) {
+    // console.log("in ShoppingCart:", updatedItem);
+    const updatedItems = items.map((item) => {
+      if (item.id === updatedItem.id) {
+        return (updatedItem);
+      }
+      else {
+        return (item);
+      }
+    });
+
+    setItems(updatedItems);
+  }
+
+  function handleDelete(deletedItem) {
+    // console.log("In ShoppingCart:", deletedItem);
+    const updatedItems = items.filter((item) => item.id !== deletedItem.id);
+    setItems(updatedItems);
+  }
+
+
+  function handleAddItem(newItem) {
+    // console.log("In shoppingList:", newItem)
+    setItems([...items, newItem]);
+  }
+
   const itemsToDisplay = items.filter((item) => {
     if (selectedCategory === "All") return true;
 
@@ -19,14 +52,14 @@ function ShoppingList() {
 
   return (
     <div className="ShoppingList">
-      <ItemForm />
+      <ItemForm onAddItem={handleAddItem}/>
       <Filter
         category={selectedCategory}
         onCategoryChange={handleCategoryChange}
       />
       <ul className="Items">
         {itemsToDisplay.map((item) => (
-          <Item key={item.id} item={item} />
+          <Item key={item.id} item={item} onUpdatedItem={handleUPdatedItem} onDelete={handleDelete}/>
         ))}
       </ul>
     </div>
